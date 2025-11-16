@@ -1,0 +1,12 @@
+# Use PyTorch nightly build for CUDA 12.9 (compatible with RTX 5060 Ti)
+torch --index-url https://download.pytorch.org/whl/nightly/cu129
+torchvision --index-url https://download.pytorch.org/whl/nightly/cu129
+torchaudio --index-url https://download.pytorch.org/whl/nightly/cu129
+
+# Other dependencies (compatible with PyTorch nightly)
+diffusers==0.24.0
+transformers==4.35.2
+datasets==2.14.6
+numpy==1.26.2
+matplotlib==3.8.2
+tqdm==4.66.1
