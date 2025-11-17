@@ -1,18 +1,18 @@
 import torch
-from diffusers import UNet3D, DDPMScheduler
+from diffusers import UNet3D, FlowMatchingScheduler  # New scheduler
 from transformers import CLIPTextModel, CLIPTokenizer
 from config import Config
 
-class TextConditionedPoseDiffusion:
+class TextConditionedPoseFlowMatching:  # Renamed for clarity
     def __init__(self):
         self.config = Config()
         self.device = self.config.DEVICE
 
-        # Text encoder (CLIP)
+        # Text encoder (same as before)
         self.tokenizer = CLIPTokenizer.from_pretrained(self.config.TEXT_ENCODER_NAME)
         self.text_encoder = CLIPTextModel.from_pretrained(self.config.TEXT_ENCODER_NAME).to(self.device)
 
-        # UNet for 3D pose generation
+        # UNet (same architecture works for FM)
         self.unet = UNet3D(
             sample_size=self.config.NUM_JOINTS,
             in_channels=self.config.UNET_IN_CHANNELS,
@@ -23,10 +23,10 @@ class TextConditionedPoseDiffusion:
             time_embedding_dim=128
         ).to(self.device)
 
-        # Diffusion scheduler
-        self.scheduler = DDPMScheduler(
-            num_train_timesteps=self.config.SCHEDULER_NUM_TIMESTEPS,
-            beta_schedule="squaredcos_cap_v2"
+        # Flow Matching scheduler (replaces DDPMScheduler)
+        self.scheduler = FlowMatchingScheduler(
+            num_train_timesteps=self.config.FM_TIME_STEPS,
+            sigma=self.config.FM_SIGMA  # Initial noise scale
         )
 
     def encode_text(self, texts):

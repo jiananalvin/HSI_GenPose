@@ -4,7 +4,7 @@ torchvision --index-url https://download.pytorch.org/whl/nightly/cu129
 torchaudio --index-url https://download.pytorch.org/whl/nightly/cu129
 
 # Other dependencies (compatible with PyTorch nightly)
-diffusers==0.24.0
+diffusers==0.30.3
 transformers==4.35.2
 datasets==2.14.6
 numpy==1.26.2

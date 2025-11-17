@@ -35,25 +35,28 @@ def visualize_pose(pose, title="3D Human Pose"):
     plt.show()
 
 def generate_pose(model, text):
-    """Generate 3D pose from text using trained model"""
+    """Generate 3D pose using Flow Matching"""
     model.unet.eval()
     config = Config()
     
-    # Encode text
     text_embeddings = model.encode_text([text])
     
-    # Initialize with random noise
-    pose = torch.randn(1, config.NUM_JOINTS, config.POSE_DIM).to(config.DEVICE)
+    # Start with initial noise (x0)
+    x = torch.randn(1, config.NUM_JOINTS, config.POSE_DIM).to(config.DEVICE) * config.FM_SIGMA
     
-    # Denoise step-by-step
-    model.scheduler.set_timesteps(config.SCHEDULER_NUM_TIMESTEPS)
+    # Iterate through time steps (0 → 1)
+    num_steps = config.FM_TIME_STEPS
+    dt = 1.0 / num_steps  # Time step size
+    
     with torch.no_grad():
-        for t in model.scheduler.timesteps:
-            noise_pred = model.unet(
-                pose,
-                torch.tensor([t]).to(config.DEVICE),
-                encoder_hidden_states=text_embeddings
-            ).sample
-            pose = model.scheduler.step(noise_pred, t, pose).prev_sample
+        for i in range(num_steps):
+            t = torch.tensor([i / num_steps], device=config.DEVICE)  # Current time (0 to 1)
+            
+            # Predict velocity at current time
+            v = model.unet(x, t, encoder_hidden_states=text_embeddings).sample
+            
+            # Update x using the velocity (Euler integration)
+            x = x + v * dt
     
-    return pose.cpu().numpy().squeeze()
+    return x.cpu().numpy().squeeze()
+

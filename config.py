@@ -27,3 +27,7 @@ class Config:
 
     # Logging
     LOG_INTERVAL = 100  # Steps between loss logs
+
+    # Flow Matching settings
+    FM_TIME_STEPS = 100  # Fewer steps than diffusion (faster!)
+    FM_SIGMA = 0.01      # Noise scale for initial distribution
